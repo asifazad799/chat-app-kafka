@@ -17,7 +17,7 @@ import { KafkaService } from "../../services/kafka/kafka.service";
       useFactory: () => {
         const clientId = "chat-client";
         const groupId = "chat-group";
-        const maxWaitTimeInMs = 20000;
+        const maxWaitTimeInMs = 2000;
         const minBytes = 500000;
         return new KafkaService(clientId, groupId, maxWaitTimeInMs, minBytes);
       },

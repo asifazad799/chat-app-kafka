@@ -34,6 +34,7 @@ export class ChatConsumer implements OnModuleInit {
             sender: parsed?.sender,
             timestamp: new Date(parsed?.timestamp),
             batchId: parsed?.batchId,
+            roomId: parsed?.roomId,
           };
         });
 
