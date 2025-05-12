@@ -3,21 +3,21 @@ import { Kafka, EachBatchPayload, ConsumerRunConfig, Consumer } from 'kafkajs';
 
 @Injectable()
 export class KafkaService implements OnModuleInit {
-  private readonly KAFKA_BROKERS = ['localhost:9092'];
+  private readonly KAFKA_BROKERS = ["localhost:9092"];
 
   private readonly logger = new Logger(KafkaService.name);
   private kafka: Kafka;
   private consumer: Consumer;
 
   constructor(
-    private readonly clientId: string, 
+    private readonly clientId: string,
     private readonly groupId: string,
     private readonly maxWaitTimeInMs: number,
     private readonly minBytes: number
   ) {
     this.kafka = new Kafka({
       clientId: this.clientId,
-      brokers: this.KAFKA_BROKERS
+      brokers: this.KAFKA_BROKERS,
     });
 
     this.consumer = this.kafka.consumer({
@@ -30,12 +30,12 @@ export class KafkaService implements OnModuleInit {
 
   async onModuleInit() {
     await this.consumer.connect();
-    this.logger.log('Kafka connected');
+    this.logger.log("Kafka connected");
   }
 
   async disconnect() {
     await this.consumer.disconnect();
-    this.logger.log('Kafka disconnected');
+    this.logger.log("Kafka disconnected");
   }
 
   async subscribe(topic: string) {
@@ -43,7 +43,11 @@ export class KafkaService implements OnModuleInit {
     this.logger.log(`Subscribed to ${topic}`);
   }
 
-  async runEachBatch(config: ConsumerRunConfig & { eachBatch: (payload: EachBatchPayload) => Promise<void> }) {
+  async runEachBatch(
+    config: ConsumerRunConfig & {
+      eachBatch: (payload: EachBatchPayload) => Promise<void>;
+    }
+  ) {
     await this.consumer.run(config);
   }
 
@@ -53,7 +57,7 @@ export class KafkaService implements OnModuleInit {
 
   public async retryOperation(
     operation: () => Promise<any>,
-    maxRetry: number, 
+    maxRetry: number,
     retryDelay: number
   ) {
     let lastError: any;
@@ -64,13 +68,24 @@ export class KafkaService implements OnModuleInit {
       } catch (error) {
         lastError = error;
         if (attempt < maxRetry) {
-          this.logger.warn(`Retry attempt ${attempt} failed. Retrying in ${retryDelay}ms...`);
+          this.logger.warn(
+            `Retry attempt ${attempt} failed. Retrying in ${retryDelay}ms...`
+          );
           await this.sleep(retryDelay);
         } else {
-          this.logger.error('Max retry attempts reached. Operation failed.');
+          this.logger.error("Max retry attempts reached. Operation failed.");
           throw lastError;
         }
       }
     }
+  }
+
+  async onModuleDestroy() {
+    await this.disconnect();
+  }
+
+  async onApplicationShutdown(signal: string) {
+    console.log(`App shutting down due to ${signal}`);
+    await this.disconnect();
   }
 }

@@ -44,6 +44,7 @@ export class ChatConsumer implements OnModuleInit {
           await this.kafkaService.retryOperation(
             async () => {
               await this.messageModel.insertMany(messages, { ordered: false });
+              // TODO: once these chat messages are successfully pushed to db, clear redis
             },
             this.MAX_RETRIES,
             this.RETRY_DELAY
